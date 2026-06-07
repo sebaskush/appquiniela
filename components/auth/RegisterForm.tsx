@@ -2,256 +2,242 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { User, Mail, Lock, Eye, EyeOff, AlertCircle, CheckCircle2, Check } from "lucide-react";
 import { registerAction } from "@/lib/actions/auth";
 import { GoogleButton } from "@/components/auth/GoogleButton";
+import { AuthLayout } from "@/components/auth/AuthLayout";
 
-const passwordRules = [
-  { label: "Al menos 8 caracteres", test: (p: string) => p.length >= 8 },
-  { label: "Una letra mayúscula",    test: (p: string) => /[A-Z]/.test(p) },
-  { label: "Un número",              test: (p: string) => /\d/.test(p) },
+const rules = [
+  { label: "8 caracteres mínimo", test: (p: string) => p.length >= 8 },
+  { label: "Una mayúscula",        test: (p: string) => /[A-Z]/.test(p) },
+  { label: "Un número",            test: (p: string) => /\d/.test(p) },
 ];
 
 export function RegisterForm() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [password, setPassword]         = useState("");
-  const [error, setError]               = useState<string | null>(null);
-  const [success, setSuccess]           = useState(false);
-  const [isPending, startTransition]    = useTransition();
+  const [showPass, setShowPass]       = useState(false);
+  const [password, setPassword]       = useState("");
+  const [error, setError]             = useState<string | null>(null);
+  const [success, setSuccess]         = useState(false);
+  const [isPending, startTransition]  = useTransition();
 
-  const passwordStrength = passwordRules.filter((r) => r.test(password)).length;
+  const strength = rules.filter((r) => r.test(password)).length;
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
-    const formData = new FormData(e.currentTarget);
+    const fd      = new FormData(e.currentTarget);
+    const pass    = fd.get("password") as string;
+    const confirm = fd.get("confirm")  as string;
 
-    const pass    = formData.get("password") as string;
-    const confirm = formData.get("confirm")  as string;
-
-    if (pass !== confirm) {
-      setError("Las contraseñas no coinciden.");
-      return;
-    }
-    if (pass.length < 8) {
-      setError("La contraseña debe tener al menos 8 caracteres.");
-      return;
-    }
+    if (pass !== confirm) { setError("Las contraseñas no coinciden."); return; }
+    if (pass.length < 8)  { setError("La contraseña debe tener al menos 8 caracteres."); return; }
 
     startTransition(async () => {
-      const result = await registerAction(formData);
-      if (result?.error) {
-        setError(result.error);
-      } else if (result?.success) {
-        setSuccess(true);
-      }
+      const res = await registerAction(fd);
+      if (res?.error)   setError(res.error);
+      else if (res?.success) setSuccess(true);
     });
   }
 
   if (success) {
     return (
-      <div className="text-center space-y-4 py-4 animate-fade-up">
-        <div className="w-16 h-16 rounded-full bg-brand-500/15 border border-brand-500/30 flex items-center justify-center mx-auto">
-          <CheckCircle2 size={32} className="text-brand-400" />
-        </div>
-        <div>
-          <h3 className="text-white font-semibold text-lg">¡Cuenta creada!</h3>
-          <p className="text-white/50 text-sm mt-1">
-            Revisa tu correo y confirma tu cuenta para comenzar a jugar.
+      <AuthLayout mode="register">
+        <div className="success-box">
+          <div className="success-icon-wrap">
+            <CheckBigIcon />
+          </div>
+          <div className="success-title">¡CUENTA CREADA!</div>
+          <p className="success-body">
+            Revisa tu correo electrónico y confirma tu cuenta para empezar a jugar.
           </p>
+          <Link href="/auth/login" className="success-link">
+            IR AL LOGIN →
+          </Link>
         </div>
-        <Link
-          href="/auth/login"
-          className="inline-block mt-2 text-sm text-brand-400 hover:text-brand-300 transition-colors"
-        >
-          Ir al inicio de sesión →
-        </Link>
-      </div>
+      </AuthLayout>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-
-      {error && (
-        <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm animate-fade-in">
-          <AlertCircle size={16} className="mt-0.5 shrink-0" />
-          <span>{error}</span>
-        </div>
-      )}
-
-      {/* Nombre */}
-      <div className="space-y-1.5">
-        <label htmlFor="nombre" className="text-xs font-medium text-white/50 uppercase tracking-widest">
-          Nombre
-        </label>
-        <div className="relative">
-          <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
-          <input
-            id="nombre"
-            name="nombre"
-            type="text"
-            autoComplete="name"
-            required
-            placeholder="Tu nombre"
-            className="
-              w-full pl-10 pr-4 py-3 rounded-xl
-              bg-white/5 border border-white/10
-              text-white placeholder:text-white/25 text-sm
-              focus:outline-none focus:border-brand-500/60 focus:bg-white/8
-              transition-all duration-200
-            "
-          />
-        </div>
+    <AuthLayout mode="register">
+      <div className="card-header">
+        <div className="card-eyebrow">Nuevo jugador</div>
+        <h1 className="card-title">CREA TU<br /><span>CUENTA</span></h1>
+        <p className="card-subtitle">Únete y compite en las quinielas de la temporada</p>
       </div>
 
-      {/* Email */}
-      <div className="space-y-1.5">
-        <label htmlFor="email" className="text-xs font-medium text-white/50 uppercase tracking-widest">
-          Email
-        </label>
-        <div className="relative">
-          <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
-          <input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            placeholder="tu@email.com"
-            className="
-              w-full pl-10 pr-4 py-3 rounded-xl
-              bg-white/5 border border-white/10
-              text-white placeholder:text-white/25 text-sm
-              focus:outline-none focus:border-brand-500/60 focus:bg-white/8
-              transition-all duration-200
-            "
-          />
-        </div>
-      </div>
-
-      {/* Contraseña */}
-      <div className="space-y-1.5">
-        <label htmlFor="password" className="text-xs font-medium text-white/50 uppercase tracking-widest">
-          Contraseña
-        </label>
-        <div className="relative">
-          <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
-          <input
-            id="password"
-            name="password"
-            type={showPassword ? "text" : "password"}
-            autoComplete="new-password"
-            required
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="
-              w-full pl-10 pr-12 py-3 rounded-xl
-              bg-white/5 border border-white/10
-              text-white placeholder:text-white/25 text-sm
-              focus:outline-none focus:border-brand-500/60 focus:bg-white/8
-              transition-all duration-200
-            "
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
-          >
-            {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
-          </button>
-        </div>
-
-        {/* Indicador de fortaleza */}
-        {password.length > 0 && (
-          <div className="space-y-2 animate-fade-in">
-            <div className="flex gap-1.5">
-              {[0, 1, 2].map((i) => (
-                <div
-                  key={i}
-                  className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-                    i < passwordStrength
-                      ? passwordStrength === 1 ? "bg-red-400"
-                        : passwordStrength === 2 ? "bg-yellow-400"
-                        : "bg-brand-400"
-                      : "bg-white/10"
-                  }`}
-                />
-              ))}
-            </div>
-            <ul className="space-y-1">
-              {passwordRules.map((rule) => (
-                <li key={rule.label} className="flex items-center gap-2 text-xs">
-                  <Check
-                    size={11}
-                    className={`transition-colors ${rule.test(password) ? "text-brand-400" : "text-white/20"}`}
-                  />
-                  <span className={`transition-colors ${rule.test(password) ? "text-white/60" : "text-white/30"}`}>
-                    {rule.label}
-                  </span>
-                </li>
-              ))}
-            </ul>
+      <form onSubmit={handleSubmit} noValidate>
+        {error && (
+          <div className="error-box" style={{ marginBottom: 14 }}>
+            <span className="error-icon"><AlertIcon /></span>
+            {error}
           </div>
         )}
-      </div>
 
-      {/* Confirmar contraseña */}
-      <div className="space-y-1.5">
-        <label htmlFor="confirm" className="text-xs font-medium text-white/50 uppercase tracking-widest">
-          Confirmar contraseña
-        </label>
-        <div className="relative">
-          <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
-          <input
-            id="confirm"
-            name="confirm"
-            type={showPassword ? "text" : "password"}
-            autoComplete="new-password"
-            required
-            placeholder="••••••••"
-            className="
-              w-full pl-10 pr-4 py-3 rounded-xl
-              bg-white/5 border border-white/10
-              text-white placeholder:text-white/25 text-sm
-              focus:outline-none focus:border-brand-500/60 focus:bg-white/8
-              transition-all duration-200
-            "
-          />
+        <div className="form-fields">
+          {/* Nombre */}
+          <div className="field">
+            <label htmlFor="reg-nombre" className="field-label">Nombre</label>
+            <div className="input-wrap">
+              <span className="input-icon"><UserIcon /></span>
+              <input
+                id="reg-nombre" name="nombre" type="text"
+                autoComplete="name" required placeholder="Tu nombre"
+                className="field-input"
+              />
+            </div>
+          </div>
+
+          {/* Email */}
+          <div className="field">
+            <label htmlFor="reg-email" className="field-label">Email</label>
+            <div className="input-wrap">
+              <span className="input-icon"><MailIcon /></span>
+              <input
+                id="reg-email" name="email" type="email"
+                autoComplete="email" required placeholder="tu@email.com"
+                className="field-input"
+              />
+            </div>
+          </div>
+
+          {/* Contraseña */}
+          <div className="field">
+            <label htmlFor="reg-password" className="field-label">Contraseña</label>
+            <div className="input-wrap">
+              <span className="input-icon"><LockIcon /></span>
+              <input
+                id="reg-password" name="password"
+                type={showPass ? "text" : "password"}
+                autoComplete="new-password" required placeholder="••••••••"
+                className="field-input" style={{ paddingRight: 44 }}
+                value={password} onChange={(e) => setPassword(e.target.value)}
+              />
+              <button
+                type="button" className="input-eye"
+                onClick={() => setShowPass(!showPass)}
+                aria-label={showPass ? "Ocultar" : "Mostrar"}
+              >
+                {showPass ? <EyeOffIcon /> : <EyeIcon />}
+              </button>
+            </div>
+
+            {/* Fortaleza */}
+            {password.length > 0 && (
+              <>
+                <div className="strength-bars">
+                  {[0, 1, 2].map((i) => (
+                    <div
+                      key={i}
+                      className={`strength-bar ${i < strength ? `s${strength}` : ""}`}
+                    />
+                  ))}
+                </div>
+                <div className="strength-checklist">
+                  {rules.map((r) => (
+                    <div key={r.label} className={`strength-item ${r.test(password) ? "ok" : ""}`}>
+                      <div className="strength-dot" />
+                      {r.label}
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Confirmar */}
+          <div className="field">
+            <label htmlFor="reg-confirm" className="field-label">Confirmar contraseña</label>
+            <div className="input-wrap">
+              <span className="input-icon"><LockIcon /></span>
+              <input
+                id="reg-confirm" name="confirm"
+                type={showPass ? "text" : "password"}
+                autoComplete="new-password" required placeholder="••••••••"
+                className="field-input"
+              />
+            </div>
+          </div>
         </div>
-      </div>
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="
-          w-full py-3 rounded-xl
-          bg-brand-500 hover:bg-brand-400
-          text-sm font-semibold text-white
-          transition-all duration-200
-          disabled:opacity-60 disabled:cursor-not-allowed
-          focus:outline-none focus:ring-2 focus:ring-brand-500/50
-          shadow-lg shadow-brand-500/20
-        "
-      >
-        {isPending ? "Creando cuenta…" : "Crear cuenta"}
-      </button>
+        <div className="form-actions">
+          <button type="submit" className="btn-primary" disabled={isPending}>
+            {isPending
+              ? <><span className="spinner" style={{ marginRight: 8 }} />Creando cuenta…</>
+              : "UNIRME AL EQUIPO"
+            }
+          </button>
 
-      <div className="flex items-center gap-3 py-1">
-        <div className="flex-1 h-px bg-white/10" />
-        <span className="text-xs text-white/30">o</span>
-        <div className="flex-1 h-px bg-white/10" />
-      </div>
+          <div className="divider">o regístrate con</div>
 
-      <GoogleButton label="Registrarse con Google" />
+          <GoogleButton label="Registrarse con Google" />
 
-      <p className="text-center text-sm text-white/40 pt-1">
-        ¿Ya tienes cuenta?{" "}
-        <Link href="/auth/login" className="text-brand-400 hover:text-brand-300 font-medium transition-colors">
-          Inicia sesión
-        </Link>
-      </p>
-    </form>
+          <p className="switch-text">
+            ¿Ya tienes cuenta?{" "}
+            <Link href="/auth/login" className="switch-link">
+              Inicia sesión →
+            </Link>
+          </p>
+        </div>
+      </form>
+    </AuthLayout>
+  );
+}
+
+/* ── Micro-iconos ─────────────────────────────────────────────── */
+function UserIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+    </svg>
+  );
+}
+function MailIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="4" width="20" height="16" rx="2"/>
+      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+    </svg>
+  );
+}
+function LockIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="11" width="18" height="11" rx="2"/>
+      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+    </svg>
+  );
+}
+function EyeIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+      <circle cx="12" cy="12" r="3"/>
+    </svg>
+  );
+}
+function EyeOffIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+      <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+      <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+      <line x1="2" y1="2" x2="22" y2="22"/>
+    </svg>
+  );
+}
+function AlertIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+  );
+}
+function CheckBigIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00FF87" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 6 9 17l-5-5"/>
+    </svg>
   );
 }

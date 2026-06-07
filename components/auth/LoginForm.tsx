@@ -3,144 +3,165 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { loginAction } from "@/lib/actions/auth";
 import { GoogleButton } from "@/components/auth/GoogleButton";
+import { AuthLayout } from "@/components/auth/AuthLayout";
 
 export function LoginForm() {
   const searchParams  = useSearchParams();
   const redirectError = searchParams.get("error");
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError]               = useState<string | null>(
+  const [showPass, setShowPass]          = useState(false);
+  const [error, setError]                = useState<string | null>(
     redirectError === "auth_callback_error"
-      ? "Hubo un problema con el inicio de sesión. Intenta de nuevo."
+      ? "Hubo un problema al iniciar sesión. Intenta de nuevo."
       : null
   );
-  const [isPending, startTransition]    = useTransition();
+  const [isPending, startTransition]     = useTransition();
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
-    const formData = new FormData(e.currentTarget);
+    const fd = new FormData(e.currentTarget);
     startTransition(async () => {
-      const result = await loginAction(formData);
-      if (result?.error) setError(result.error);
+      const res = await loginAction(fd);
+      if (res?.error) setError(res.error);
     });
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-
-      {/* Error global */}
-      {error && (
-        <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm animate-fade-in">
-          <AlertCircle size={16} className="mt-0.5 shrink-0" />
-          <span>{error}</span>
-        </div>
-      )}
-
-      {/* Email */}
-      <div className="space-y-1.5">
-        <label htmlFor="email" className="text-xs font-medium text-white/50 uppercase tracking-widest">
-          Email
-        </label>
-        <div className="relative">
-          <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
-          <input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            placeholder="tu@email.com"
-            className="
-              w-full pl-10 pr-4 py-3 rounded-xl
-              bg-white/5 border border-white/10
-              text-white placeholder:text-white/25
-              text-sm
-              focus:outline-none focus:border-brand-500/60 focus:bg-white/8
-              transition-all duration-200
-            "
-          />
-        </div>
+    <AuthLayout mode="login">
+      <div className="card-header">
+        <div className="card-eyebrow">Acceso al sistema</div>
+        <h1 className="card-title">INICIA<br /><span>SESIÓN</span></h1>
+        <p className="card-subtitle">Ingresa para ver tus quinielas y clasificaciones</p>
       </div>
 
-      {/* Contraseña */}
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
-          <label htmlFor="password" className="text-xs font-medium text-white/50 uppercase tracking-widest">
-            Contraseña
-          </label>
-          <Link
-            href="/auth/forgot-password"
-            className="text-xs text-brand-400 hover:text-brand-300 transition-colors"
-          >
-            ¿Olvidaste tu contraseña?
-          </Link>
+      <form onSubmit={handleSubmit} noValidate>
+        {error && (
+          <div className="error-box" style={{ marginBottom: 14 }}>
+            <span className="error-icon">
+              <AlertIcon />
+            </span>
+            {error}
+          </div>
+        )}
+
+        <div className="form-fields">
+          {/* Email */}
+          <div className="field">
+            <label htmlFor="login-email" className="field-label">Email</label>
+            <div className="input-wrap">
+              <span className="input-icon"><MailIcon /></span>
+              <input
+                id="login-email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                placeholder="tu@email.com"
+                className="field-input"
+              />
+            </div>
+          </div>
+
+          {/* Contraseña */}
+          <div className="field">
+            <div className="row-between">
+              <label htmlFor="login-password" className="field-label">Contraseña</label>
+              <Link href="/auth/forgot-password" className="link-forgot">
+                ¿La olvidaste?
+              </Link>
+            </div>
+            <div className="input-wrap">
+              <span className="input-icon"><LockIcon /></span>
+              <input
+                id="login-password"
+                name="password"
+                type={showPass ? "text" : "password"}
+                autoComplete="current-password"
+                required
+                placeholder="••••••••"
+                className="field-input"
+                style={{ paddingRight: 44 }}
+              />
+              <button
+                type="button"
+                className="input-eye"
+                onClick={() => setShowPass(!showPass)}
+                aria-label={showPass ? "Ocultar contraseña" : "Mostrar contraseña"}
+              >
+                {showPass ? <EyeOffIcon /> : <EyeIcon />}
+              </button>
+            </div>
+          </div>
         </div>
-        <div className="relative">
-          <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
-          <input
-            id="password"
-            name="password"
-            type={showPassword ? "text" : "password"}
-            autoComplete="current-password"
-            required
-            placeholder="••••••••"
-            className="
-              w-full pl-10 pr-12 py-3 rounded-xl
-              bg-white/5 border border-white/10
-              text-white placeholder:text-white/25
-              text-sm
-              focus:outline-none focus:border-brand-500/60 focus:bg-white/8
-              transition-all duration-200
-            "
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
-          >
-            {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+
+        <div className="form-actions">
+          <button type="submit" className="btn-primary" disabled={isPending}>
+            {isPending
+              ? <><span className="spinner" style={{ marginRight: 8 }} />Verificando…</>
+              : "ENTRAR AL CAMPO"
+            }
           </button>
+
+          <div className="divider">o continúa con</div>
+
+          <GoogleButton label="Iniciar sesión con Google" />
+
+          <p className="switch-text">
+            ¿Sin cuenta?{" "}
+            <Link href="/auth/register" className="switch-link">
+              Regístrate gratis →
+            </Link>
+          </p>
         </div>
-      </div>
+      </form>
+    </AuthLayout>
+  );
+}
 
-      {/* Submit */}
-      <button
-        type="submit"
-        disabled={isPending}
-        className="
-          w-full py-3 rounded-xl
-          bg-brand-500 hover:bg-brand-400
-          text-sm font-semibold text-white
-          transition-all duration-200
-          disabled:opacity-60 disabled:cursor-not-allowed
-          focus:outline-none focus:ring-2 focus:ring-brand-500/50
-          shadow-lg shadow-brand-500/20
-        "
-      >
-        {isPending ? "Iniciando sesión…" : "Iniciar sesión"}
-      </button>
-
-      {/* Divider */}
-      <div className="flex items-center gap-3 py-1">
-        <div className="flex-1 h-px bg-white/10" />
-        <span className="text-xs text-white/30">o</span>
-        <div className="flex-1 h-px bg-white/10" />
-      </div>
-
-      {/* Google */}
-      <GoogleButton label="Iniciar sesión con Google" />
-
-      {/* Registro */}
-      <p className="text-center text-sm text-white/40 pt-1">
-        ¿No tienes cuenta?{" "}
-        <Link href="/auth/register" className="text-brand-400 hover:text-brand-300 font-medium transition-colors">
-          Regístrate gratis
-        </Link>
-      </p>
-    </form>
+/* ── Micro-iconos ─────────────────────────────────────────────── */
+function MailIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="4" width="20" height="16" rx="2"/>
+      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+    </svg>
+  );
+}
+function LockIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="11" width="18" height="11" rx="2"/>
+      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+    </svg>
+  );
+}
+function EyeIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+      <circle cx="12" cy="12" r="3"/>
+    </svg>
+  );
+}
+function EyeOffIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+      <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+      <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+      <line x1="2" y1="2" x2="22" y2="22"/>
+    </svg>
+  );
+}
+function AlertIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
   );
 }
