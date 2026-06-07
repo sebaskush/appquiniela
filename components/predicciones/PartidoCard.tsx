@@ -22,18 +22,68 @@ type Props = {
 };
 
 const EMOJI_FLAGS: Record<string, string> = {
+  // Grupo A
   "México": "🇲🇽", "Mexico": "🇲🇽",
-  "USA": "🇺🇸", "Estados Unidos": "🇺🇸",
-  "Argentina": "🇦🇷", "Brasil": "🇧🇷", "Brazil": "🇧🇷",
-  "España": "🇪🇸", "Spain": "🇪🇸",
-  "Francia": "🇫🇷", "France": "🇫🇷",
-  "Alemania": "🇩🇪", "Germany": "🇩🇪",
-  "Inglaterra": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "England": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-  "Portugal": "🇵🇹", "Italia": "🇮🇹", "Italy": "🇮🇹",
-  "Uruguay": "🇺🇾", "Colombia": "🇨🇴", "Chile": "🇨🇱",
-  "Japón": "🇯🇵", "Japan": "🇯🇵",
-  "Marruecos": "🇲🇦", "Morocco": "🇲🇦",
+  "Sudáfrica": "🇿🇦", "Sudafrica": "🇿🇦", "South Africa": "🇿🇦",
+  "Corea del Sur": "🇰🇷", "Korea": "🇰🇷", "South Korea": "🇰🇷",
+  "Chequia": "🇨🇿", "Czech Republic": "🇨🇿", "Czechia": "🇨🇿",
+  // Grupo B
   "Canadá": "🇨🇦", "Canada": "🇨🇦",
+  "Bosnia-Herzegovina": "🇧🇦", "Bosnia": "🇧🇦",
+  "Qatar": "🇶🇦",
+  "Suiza": "🇨🇭", "Switzerland": "🇨🇭",
+  // Grupo C
+  "Brasil": "🇧🇷", "Brazil": "🇧🇷",
+  "Marruecos": "🇲🇦", "Morocco": "🇲🇦",
+  "Haití": "🇭🇹", "Haiti": "🇭🇹",
+  "Escocia": "🏴󠁧󠁢󠁳󠁣󠁴󠁿", "Scotland": "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+  // Grupo D
+  "USA": "🇺🇸", "Estados Unidos": "🇺🇸", "United States": "🇺🇸",
+  "Paraguay": "🇵🇾",
+  "Australia": "🇦🇺",
+  "Türkiye": "🇹🇷", "Turquía": "🇹🇷", "Turkey": "🇹🇷",
+  // Grupo E
+  "Alemania": "🇩🇪", "Germany": "🇩🇪",
+  "Curazao": "🇨🇼", "Curaçao": "🇨🇼", "Curacao": "🇨🇼",
+  "Costa de Marfil": "🇨🇮", "Ivory Coast": "🇨🇮",
+  "Ecuador": "🇪🇨",
+  // Grupo F
+  "Países Bajos": "🇳🇱", "Netherlands": "🇳🇱", "Holanda": "🇳🇱",
+  "Japón": "🇯🇵", "Japan": "🇯🇵",
+  "Suecia": "🇸🇪", "Sweden": "🇸🇪",
+  "Túnez": "🇹🇳", "Tunisia": "🇹🇳",
+  // Grupo G
+  "Bélgica": "🇧🇪", "Belgium": "🇧🇪",
+  "Egipto": "🇪🇬", "Egypt": "🇪🇬",
+  "Irán": "🇮🇷", "Iran": "🇮🇷",
+  "Nueva Zelanda": "🇳🇿", "New Zealand": "🇳🇿",
+  // Grupo H
+  "España": "🇪🇸", "Spain": "🇪🇸",
+  "Cabo Verde": "🇨🇻", "Cape Verde": "🇨🇻",
+  "Arabia Saudita": "🇸🇦", "Saudi Arabia": "🇸🇦",
+  "Uruguay": "🇺🇾",
+  // Grupo I
+  "Francia": "🇫🇷", "France": "🇫🇷",
+  "Senegal": "🇸🇳",
+  "Irak": "🇮🇶", "Iraq": "🇮🇶",
+  "Noruega": "🇳🇴", "Norway": "🇳🇴",
+  // Grupo J
+  "Argentina": "🇦🇷",
+  "Argelia": "🇩🇿", "Algeria": "🇩🇿",
+  "Austria": "🇦🇹",
+  "Jordania": "🇯🇴", "Jordan": "🇯🇴",
+  // Grupo K
+  "Portugal": "🇵🇹",
+  "Rep. D. del Congo": "🇨🇩", "Rep. Dem. del Congo": "🇨🇩", "DR Congo": "🇨🇩",
+  "Uzbekistán": "🇺🇿", "Uzbekistan": "🇺🇿",
+  "Colombia": "🇨🇴",
+  // Grupo L
+  "Inglaterra": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "England": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+  "Croacia": "🇭🇷", "Croatia": "🇭🇷",
+  "Ghana": "🇬🇭",
+  "Panamá": "🇵🇦", "Panama": "🇵🇦",
+  // Otros
+  "Chile": "🇨🇱", "Italia": "🇮🇹", "Italy": "🇮🇹",
 };
 
 function EscudoEquipo({ nombre, logoUrl, lado }: { nombre: string; logoUrl: string | null; lado: "local" | "visitante" }) {
